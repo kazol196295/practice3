@@ -1,0 +1,31 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "cppbuild",
+      "label": "Opengl program",
+      "command": "C:\\Program Files\\CodeBlocks\\MinGW\\bin\\g++.exe",
+      "args": [
+        "-g",
+        "-std=c++17",
+        "-I${workspaceFolder}/include", // Path to the header files
+        "-L${workspaceFolder}/lib", // Path to the library files
+        "-I${workspaceFolder}/include/glm", // Path to the glm header files
+        "${workspaceFolder}/src/*.cpp", // Compile all the cpp files in the src folder
+        "${workspaceFolder}/src/glad.c", // Compile the glad.c file
+        "-lglfw3dll", // Link against the glfw3dll library
+        "-o",
+        "${workspaceFolder}/cutable.exe"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": ["$gcc"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "compiler: C:\\Program Files\\CodeBlocks\\MinGW\\bin\\g++.exe"
+    }
+  ]
+}

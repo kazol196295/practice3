@@ -1,0 +1,18 @@
+{
+  "configurations": [
+    {
+      "name": "Win32",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/include", // Path to your project-specific includes
+        "${workspaceFolder}/include/glm" // Specific path to the GLM headers
+      ],
+      "defines": [],
+      "compilerPath": "C:/Program Files/CodeBlocks/MinGW/bin/g++.exe",
+      "cStandard": "c17",
+      "cppStandard": "c++17",
+      "intelliSenseMode": "windows-gcc-x64"
+    }
+  ],
+  "version": 4
+}
