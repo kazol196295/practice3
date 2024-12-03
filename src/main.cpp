@@ -264,11 +264,7 @@ int main()
             1.9f, 0.04f, 1.9f, //scale
             0.8f, 0.01f,
             glm::vec4(0.72f, 0.52f, 0.04f, 1.0f));
-        //Drawing legs
-        //drawCube(ourShader, VAO, parentTrans, -.60f, 0.24f, -0.6f, 0.0f, 0.0f, 0.0f, 0.2f, 1.2f, 0.2f, glm::vec4(0.6f, 0.6f, 0.6f, 1.0f)); // leg 1
-        //drawCube(ourShader, VAO, parentTrans, 0.6f, 0.24f, -0.6f, 0.0f, 0.0f, 0.0f, 0.2f, 1.2f, 0.2f, glm::vec4(0.6f, 0.6f, 0.6f, 1.0f));  // leg 2
-        //drawCube(ourShader, VAO, parentTrans, 0.6f, 0.24f, 0.6f, 0.0f, 0.0f, 0.0f, 0.2f, 1.2f, 0.2f, glm::vec4(0.6f, 0.6f, 0.6f, 1.0f));   // leg 3
-        //drawCube(ourShader, VAO, parentTrans, -0.6f, 0.24f, 0.6f, 0.0f, 0.0f, 0.0f, 0.2f, 1.2f, 0.2f, glm::vec4(0.6f, 0.6f, 0.6f, 1.0f));  // leg 4
+      
 
         //cylindrical leg
         drawCylinder(ourShader, cylinderVAO, parentTrans,
@@ -312,58 +308,6 @@ int main()
         drawCube(ourShader, VAO, parentTrans, -1.1f, 0.1f, -0.2f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f)); // leg
         drawCube(ourShader, VAO, parentTrans, -1.13f, 0.4f, 0.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.8f, 1.0f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));  // backrest
 
-
-        //Drawing kitchen stand
-        // drawCube(ourShader, VAO, parentTrans, 0.0f, 0.8f, -2.5f, 0.0f, 0.0f, 0.0f, 11.9f, 0.2f, 2.0f, glm::vec4(0.72f, 0.52f, 0.34f, 1.0f)); // ceramic surface
-        // drawCube(ourShader, VAO, parentTrans, 2.8f, 0.4f, -2.6f, 0.0f, 90.0f, 0.0f, 1.6f, 1.6f, 0.7f, glm::vec4(0.62f, 0.42f, 0.24f, 1.0f)); //base
-        // drawCube(ourShader, VAO, parentTrans, -2.8f, 0.4f, -2.6f, 0.0f, 90.0f, 0.0f, 1.6f, 1.6f, 0.7f, glm::vec4(0.62f, 0.42f, 0.24f, 1.0f)); //base
-
-        //Drawing the stove
-        // drawCube(ourShader, VAO, parentTrans, 0.0f, 0.9f, -2.5f, 0.0f, 0.0f, 0.0f, 1.9f, 0.12f, 1.9f, glm::vec4(0.5f, 0.52f, 0.5f, 1.0f)); //stove surface
-        // drawCube(ourShader, VAO, parentTrans, 0.3f, 0.9f, -2.8f, 0.0f, 45.0f, 0.0f, 0.6f, 0.2f, 0.1f, glm::vec4(0.6f, 0.52f, 0.6f, 1.0f)); //fire border 1
-        // drawCube(ourShader, VAO, parentTrans, -0.3f, 0.9f, -2.8f, 0.0f, -45.0f, 0.0f, 0.6f, 0.2f, 0.1f, glm::vec4(0.6f, 0.52f, 0.6f, 1.0f)); //fire border 2
-        // drawCube(ourShader, VAO, parentTrans, 0.3f, 0.9f, -2.2f, 0.0f, -45.0f, 0.0f, 0.6f, 0.2f, 0.1f, glm::vec4(0.6f, 0.52f, 0.6f, 1.0f)); //fire border 3
-        // drawCube(ourShader, VAO, parentTrans, -0.3f, 0.9f, -2.2f, 0.0f, 45.0f, 0.0f, 0.6f, 0.2f, 0.1f, glm::vec4(0.6f, 0.52f, 0.6f, 1.0f)); //fire border 4
-        // drawCylinder(ourShader, cylinderVAO, parentTrans,
-        //     0.1f,0.94f, -2.35f, // position
-        //     0.0f, 0.0f, 0.0f, //rotation
-        //     0.3f, 0.04f, 0.3f, //scale
-        //     0.8f, 0.01f,
-        //     glm::vec4(0.5f, 0.3f, 0.3f, 1.0f));
-
-
-        //Drawing the basin
-        
-        //  //basin surface
-        // drawCube(ourShader, VAO, parentTrans, 2.25f, 0.85f, -2.5f, 0.0f, 0.0f, 0.0f, 3.0f, 0.05f, 1.9f, glm::vec4(0.5f, 0.52f, 0.5f, 1.0f));
-        
-        //faucet
-        // drawCube(ourShader, VAO, parentTrans, 2.0f, 0.95f, -2.7f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0.1f, glm::vec4(0.4f, 0.4f, 0.4f, 1.0f));//lower pipe
-        // drawCube(ourShader, VAO, parentTrans, 2.0f, 1.1f, -2.65f, 0.0f, 90.0f, 90.0f, 0.1f, 0.5f, 0.1f, glm::vec4(0.4f, 0.4f, 0.4f, 1.0f));//mid pipe
-
-        //sink pipe
-        // drawCylinder(ourShader, cylinderVAO, parentTrans,
-        //     2.0f, 0.6f, -2.6f, // position
-        //     0.0f, 0.0f, 0.0f, //rotation
-        //     0.1f, 1.0f, 0.1f, //scale
-        //     0.8f, 0.01f,
-        //     glm::vec4(0.4f, 0.4f, 0.4f, 1.0f));
-        
-        //sink
-        // drawCylinder(ourShader, cylinderVAO, parentTrans,
-        //     2.1f, 0.87f, -2.3f, // position
-        //     0.0f, 0.0f, 0.0f, //rotation
-        //     0.4f, 0.01f, 0.4f, //scale
-        //     0.8f, 0.01f,
-        //     glm::vec4(0.4f, 0.4f, 0.4f, 1.0f));
-
-        //knob
-        // drawCylinder(ourShader, cylinderVAO, parentTrans,
-        //     2.04f, 0.9f, -2.7f, // position
-        //     90.0f, 0.0f, 90.0f, //rotation
-        //     0.1f, 0.1f, 0.1f, //scale
-        //     0.8f, 0.01f,
-        //     glm::vec4(0.4f, 0.4f, 0.4f, 1.0f));
         
         // Drawing floor
         drawCube(ourShader, VAO, parentTrans, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 12.0, 0.05, 12.0, glm::vec4(0.7f, 0.7f, 0.7f, 1.0f));
