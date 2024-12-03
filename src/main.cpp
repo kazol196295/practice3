@@ -26,14 +26,19 @@ using namespace std;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
+void generateSphereVertices(std::vector<float> &vertices, std::vector<unsigned int> &indices, int segments, int rings, float radius);
+void drawSphere(Shader shaderProgram, unsigned int VAO, glm::mat4 parentTrans,
+float posX, float posY, float posZ, float rotX, float rotY, float rotZ, float scX, float scY, float scZ,float radius, glm::vec4 color);
+void drawCone(Shader shaderProgram, unsigned int VAO, glm::mat4 parentTrans, float posX, float posY, float posZ,float rotX, float rotY, float rotZ,float scX, float scY, float scZ, float height, float radius, glm::vec4 color);
+void generateConeVertices(std::vector<float> &vertices, std::vector<unsigned int> &indices, int segments, float height, float radius);
 
-// draw object functions
-void drawCube(Shader shaderProgram, unsigned int VAO,
-    glm::mat4 parentTrans,
-    float posX = 0.0f, float posY = 0.0f, float posZ = 0.0f,
-    float rotX = 0.0f, float rotY = 0.0f, float rotZ = 0.0f,
-    float scX = 1.0f, float scY = 1.0f, float scZ = 1.0f,
-    glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)); // Default color is green
+    // draw object functions
+    void drawCube(Shader shaderProgram, unsigned int VAO,
+                  glm::mat4 parentTrans,
+                  float posX = 0.0f, float posY = 0.0f, float posZ = 0.0f,
+                  float rotX = 0.0f, float rotY = 0.0f, float rotZ = 0.0f,
+                  float scX = 1.0f, float scY = 1.0f, float scZ = 1.0f,
+                  glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)); // Default color is green
 
 //Genearate Cylinder Vertices shadowing
 void generateCylinderVertices(std::vector<float>& vertices, std::vector<unsigned int>& indices, int segments, float height, float radius);
@@ -381,9 +386,6 @@ int main()
         drawCube(ourShader, VAO, parentTrans, -2.15, 0.5, -0.3f, 0.0f, 0.0f, 0.0f, 0.1f, 0.7f, 0.1f, glm::vec4(0.2f, 0.2f, 0.2f, 1.0f)); // lower handle
         drawCube(ourShader, VAO, parentTrans, -2.15, 1.25, -0.3f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0.1f, glm::vec4(0.2f, 0.2f, 0.2f, 1.0f)); // lower handle
 
-        // Create a transformation matrix for the fan
-        // glm::mat4 fanTransform = glm::translate(parentTrans, glm::vec3(0.0f, 2.5f, 0.0f)); // Move fan above the floor
-        // fanTransform = glm::rotate(fanTransform, glm::radians(fanRotateAngle_Y), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate the fan around Y-axis
 
         // Draw the fan
         glm::mat4 fanTransform = glm::translate(parentTrans, glm::vec3(0.0f, 2.4f, 0.0f));                     // Move fan above the floor
@@ -467,6 +469,23 @@ int main()
                      0.05f, 1.0f, 0.05f,                 // scale (long and thin)
                      1.0f, 0.05f,                        // height, radius
                      glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)); // color (white)
+
+        // Draw a sphere
+        drawSphere(ourShader, VAO, parentTrans,
+                   -2.0f, 0.5f, 1.0f,                   // position (adjusted y to 0.5)
+                   0.0f, 0.0f, 0.0f,                   // rotation
+                   1.0f, 1.0f, 1.0f,                   // scale
+                   0.2f,                               // radius
+                   glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)); // color (red)
+
+        // Draw a cone
+        drawCone(ourShader, VAO, parentTrans,
+                 -2.0f, 0.0f, 1.7f,                   // position
+                 0.0f, 0.0f, 0.0f,                   // rotation
+                 1.0f, 1.0f, 1.0f,                   // scale
+                 0.8f,                               // height
+                 0.3f,                               // radius
+                 glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)); // color (green)
 
         // Swap buffers and poll IO events
         glfwSwapBuffers(window);
@@ -673,3 +692,194 @@ void generateCylinderVertices(std::vector<float>& vertices, std::vector<unsigned
     }
 }
 
+void generateSphereVertices(std::vector<float> &vertices, std::vector<unsigned int> &indices, int segments, int rings, float radius)
+{
+    for (int i = 0; i <= rings; ++i)
+    {
+        float theta = i * glm::pi<float>() / rings;
+        float sinTheta = sin(theta);
+        float cosTheta = cos(theta);
+
+        for (int j = 0; j <= segments; ++j)
+        {
+            float phi = j * 2 * glm::pi<float>() / segments;
+            float sinPhi = sin(phi);
+            float cosPhi = cos(phi);
+
+            float x = cosPhi * sinTheta;
+            float y = cosTheta;
+            float z = sinPhi * sinTheta;
+            float u = 1 - (float)j / segments;
+            float v = 1 - (float)i / rings;
+
+            vertices.push_back(radius * x);
+            vertices.push_back(radius * y);
+            vertices.push_back(radius * z);
+            vertices.push_back(u);
+            vertices.push_back(v);
+        }
+    }
+
+    for (int i = 0; i < rings; ++i)
+    {
+        for (int j = 0; j < segments; ++j)
+        {
+            int first = (i * (segments + 1)) + j;
+            int second = first + segments + 1;
+
+            indices.push_back(first);
+            indices.push_back(second);
+            indices.push_back(first + 1);
+
+            indices.push_back(second);
+            indices.push_back(second + 1);
+            indices.push_back(first + 1);
+        }
+    }
+}
+
+void drawSphere(Shader shaderProgram, unsigned int VAO, glm::mat4 parentTrans,
+                float posX, float posY, float posZ,
+                float rotX, float rotY, float rotZ,
+                float scX, float scY, float scZ,
+                float radius, glm::vec4 color)
+{
+    shaderProgram.use();
+    std::vector<float> sphereVertices;
+    std::vector<unsigned int> sphereIndices;
+    int segments = 36;
+    int rings = 18;
+    generateSphereVertices(sphereVertices, sphereIndices, segments, rings, radius);
+
+    unsigned int sphereVAO, sphereVBO, sphereEBO;
+    glGenVertexArrays(1, &sphereVAO);
+    glGenBuffers(1, &sphereVBO);
+    glGenBuffers(1, &sphereEBO);
+
+    glBindVertexArray(sphereVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, sphereVBO);
+    glBufferData(GL_ARRAY_BUFFER, sphereVertices.size() * sizeof(float), &sphereVertices[0], GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sphereIndices.size() * sizeof(unsigned int), &sphereIndices[0], GL_STATIC_DRAW);
+
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
+
+    // texture coordinate attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    // Apply transformations: translation, rotation, scaling
+    glm::mat4 translateMatrix, rotateXMatrix, rotateYMatrix, rotateZMatrix, model, modelCentered;
+    translateMatrix = glm::translate(parentTrans, glm::vec3(posX, posY, posZ));
+    rotateXMatrix = glm::rotate(translateMatrix, glm::radians(rotX), glm::vec3(1.0f, 0.0f, 0.0f));
+    rotateYMatrix = glm::rotate(rotateXMatrix, glm::radians(rotY), glm::vec3(0.0f, 1.0f, 0.0f));
+    rotateZMatrix = glm::rotate(rotateYMatrix, glm::radians(rotZ), glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::scale(rotateZMatrix, glm::vec3(scX, scY, scZ));
+    modelCentered = glm::translate(model, glm::vec3(-0.25f, -0.25f, -0.25f));
+
+    // Set the model transformation in the shader
+    shaderProgram.setMat4("model", modelCentered);
+
+    // Use the custom color passed to the function
+    shaderProgram.setVec4("color", color);
+
+    glBindVertexArray(sphereVAO);
+    glDrawElements(GL_TRIANGLES, sphereIndices.size(), GL_UNSIGNED_INT, 0);
+
+    // De-allocate resources
+    glDeleteVertexArrays(1, &sphereVAO);
+    glDeleteBuffers(1, &sphereVBO);
+    glDeleteBuffers(1, &sphereEBO);
+}
+
+void generateConeVertices(std::vector<float> &vertices, std::vector<unsigned int> &indices, int segments, float height, float radius)
+{
+    // Generate vertices for the base
+    for (int i = 0; i <= segments; ++i)
+    {
+        float theta = i * 2.0f * glm::pi<float>() / segments;
+        float x = radius * cos(theta);
+        float z = radius * sin(theta);
+        vertices.push_back(x);
+        vertices.push_back(0.0f);
+        vertices.push_back(z);
+    }
+
+    // Add the apex vertex
+    vertices.push_back(0.0f);
+    vertices.push_back(height);
+    vertices.push_back(0.0f);
+
+    // Generate indices for the base
+    for (int i = 0; i < segments; ++i)
+    {
+        indices.push_back(i);
+        indices.push_back((i + 1) % segments);
+        indices.push_back(segments);
+    }
+
+    // Generate indices for the sides
+    for (int i = 0; i < segments; ++i)
+    {
+        indices.push_back(i);
+        indices.push_back((i + 1) % segments);
+        indices.push_back(segments + 1);
+    }
+}
+
+void drawCone(Shader shaderProgram, unsigned int VAO, glm::mat4 parentTrans,
+              float posX, float posY, float posZ,
+              float rotX, float rotY, float rotZ,
+              float scX, float scY, float scZ,
+              float height, float radius, glm::vec4 color)
+{
+    shaderProgram.use();
+    std::vector<float> coneVertices;
+    std::vector<unsigned int> coneIndices;
+    int segments = 36;
+    generateConeVertices(coneVertices, coneIndices, segments, height, radius);
+
+    unsigned int coneVAO, coneVBO, coneEBO;
+    glGenVertexArrays(1, &coneVAO);
+    glGenBuffers(1, &coneVBO);
+    glGenBuffers(1, &coneEBO);
+
+    glBindVertexArray(coneVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, coneVBO);
+    glBufferData(GL_ARRAY_BUFFER, coneVertices.size() * sizeof(float), &coneVertices[0], GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, coneEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, coneIndices.size() * sizeof(unsigned int), &coneIndices[0], GL_STATIC_DRAW);
+
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
+
+    // Apply transformations: translation, rotation, scaling
+    glm::mat4 translateMatrix, rotateXMatrix, rotateYMatrix, rotateZMatrix, model, modelCentered;
+    translateMatrix = glm::translate(parentTrans, glm::vec3(posX, posY, posZ));
+    rotateXMatrix = glm::rotate(translateMatrix, glm::radians(rotX), glm::vec3(1.0f, 0.0f, 0.0f));
+    rotateYMatrix = glm::rotate(rotateXMatrix, glm::radians(rotY), glm::vec3(0.0f, 1.0f, 0.0f));
+    rotateZMatrix = glm::rotate(rotateYMatrix, glm::radians(rotZ), glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::scale(rotateZMatrix, glm::vec3(scX, scY, scZ));
+    modelCentered = glm::translate(model, glm::vec3(-0.25f, -0.25f, -0.25f));
+
+    // Set the model transformation in the shader
+    shaderProgram.setMat4("model", modelCentered);
+
+    // Use the custom color passed to the function
+    shaderProgram.setVec4("color", color);
+
+    glBindVertexArray(coneVAO);
+    glDrawElements(GL_TRIANGLES, coneIndices.size(), GL_UNSIGNED_INT, 0);
+
+    // De-allocate resources
+    glDeleteVertexArrays(1, &coneVAO);
+    glDeleteBuffers(1, &coneVBO);
+    glDeleteBuffers(1, &coneEBO);
+}
