@@ -23,33 +23,33 @@
 
 using namespace std;
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(GLFWwindow* window);
+void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
+void processInput(GLFWwindow *window);
 void generateSphereVertices(std::vector<float> &vertices, std::vector<unsigned int> &indices, int segments, int rings, float radius);
 void drawSphere(Shader shaderProgram, unsigned int VAO, glm::mat4 parentTrans,
-float posX, float posY, float posZ, float rotX, float rotY, float rotZ, float scX, float scY, float scZ,float radius, glm::vec4 color);
-void drawCone(Shader shaderProgram, unsigned int VAO, glm::mat4 parentTrans, float posX, float posY, float posZ,float rotX, float rotY, float rotZ,float scX, float scY, float scZ, float height, float radius, glm::vec4 color);
+                float posX, float posY, float posZ, float rotX, float rotY, float rotZ, float scX, float scY, float scZ, float radius, glm::vec4 color);
+void drawCone(Shader shaderProgram, unsigned int VAO, glm::mat4 parentTrans, float posX, float posY, float posZ, float rotX, float rotY, float rotZ, float scX, float scY, float scZ, float height, float radius, glm::vec4 color);
 void generateConeVertices(std::vector<float> &vertices, std::vector<unsigned int> &indices, int segments, float height, float radius);
 
-    // draw object functions
-    void drawCube(Shader shaderProgram, unsigned int VAO,
-                  glm::mat4 parentTrans,
-                  float posX = 0.0f, float posY = 0.0f, float posZ = 0.0f,
-                  float rotX = 0.0f, float rotY = 0.0f, float rotZ = 0.0f,
-                  float scX = 1.0f, float scY = 1.0f, float scZ = 1.0f,
-                  glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)); // Default color is green
+// draw object functions
+void drawCube(Shader shaderProgram, unsigned int VAO,
+              glm::mat4 parentTrans,
+              float posX = 0.0f, float posY = 0.0f, float posZ = 0.0f,
+              float rotX = 0.0f, float rotY = 0.0f, float rotZ = 0.0f,
+              float scX = 1.0f, float scY = 1.0f, float scZ = 1.0f,
+              glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)); // Default color is green
 
-//Genearate Cylinder Vertices shadowing
-void generateCylinderVertices(std::vector<float>& vertices, std::vector<unsigned int>& indices, int segments, float height, float radius);
+// Genearate Cylinder Vertices shadowing
+void generateCylinderVertices(std::vector<float> &vertices, std::vector<unsigned int> &indices, int segments, float height, float radius);
 
-//draw Cylinder shadow parameter
+// draw Cylinder shadow parameter
 void drawCylinder(Shader shaderProgram, unsigned int VAO, glm::mat4 parentTrans,
-    float posX, float posY, float posZ,
-    float rotX, float rotY, float rotZ,
-    float scX, float scY, float scZ,
-    float height, float radius, glm::vec4 color);
-//define callback function
+                  float posX, float posY, float posZ,
+                  float rotX, float rotY, float rotZ,
+                  float scX, float scY, float scZ,
+                  float height, float radius, glm::vec4 color);
+// define callback function
 void window_close_callback(GLFWwindow *window)
 {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
@@ -70,8 +70,6 @@ float scale_X = 1.0;
 float scale_Y = 1.0;
 float scale_Z = 1.0;
 
-
-
 // camera
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
@@ -80,10 +78,91 @@ bool firstMouse = true;
 BasicCamera basic_camera(3.0f, 3.0f, 3.0f, 0.0f, 0.0f, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 
 // timing
-float deltaTime = 0.0f;    // time between current frame and last frame
+float deltaTime = 0.0f; // time between current frame and last frame
 float lastFrame = 0.0f;
 float fanRotateAngle_Y = 0.0f;
 bool isFanRotating = false;
+
+struct PointLight
+{
+    glm::vec3 position;
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+    float constant;
+    float linear;
+    float quadratic;
+};
+
+struct DirectionalLight
+{
+    glm::vec3 direction;
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+};
+
+struct SpotLight
+{
+    glm::vec3 position;
+    glm::vec3 direction;
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+    float cutOff;
+    float outerCutOff;
+};
+
+struct EmissiveLight
+{
+    glm::vec3 color;
+};
+
+// Light toggle flags
+bool directionalLightOn = true;
+bool pointLight1On = true;
+bool pointLight2On = true;
+bool spotLightOn = true;
+bool emissiveLightOn = true;
+bool ambientOn = true;
+bool diffuseOn = true;
+bool specularOn = true;
+
+// Define lights
+DirectionalLight directionalLight = {
+    glm::vec3(-0.0f, -0.0f, -1.0f), // Direction of the light
+    glm::vec3(0.1f, 0.1f, 0.1f),    // Ambient color
+    glm::vec3(0.8f, 0.8f, 0.8f),    // Diffuse color
+    glm::vec3(1.0f, 1.0f, 1.0f)     // Specular color
+};
+
+PointLight pointLight1 = {
+    glm::vec3(-2.0f, 0.0f, 2.0f), // Position
+    glm::vec3(0.1f, 0.1f, 0.1f),  // Ambient color
+    glm::vec3(0.8f, 0.8f, 0.8f),  // Diffuse color
+    glm::vec3(1.0f, 1.0f, 1.0f),  // Specular color
+    1.0f, 0.09f, 0.032f           // Attenuation factors
+};
+
+PointLight pointLight2 = {
+    glm::vec3(0.0f, 2.2f, -2.9f),
+    glm::vec3(0.1f, 0.1f, 0.1f),
+    glm::vec3(0.8f, 0.8f, 0.8f),
+    glm::vec3(1.0f, 1.0f, 1.0f),
+    1.0f, 0.09f, 0.032f};
+
+SpotLight spotLight = {
+    glm::vec3(-2.0f, 0.0f, 1.7f),
+    glm::vec3(0.0f, 1.0f, 0.0f),
+    glm::vec3(0.1f, 0.1f, 0.1f),
+    glm::vec3(0.8f, 0.8f, 0.8f),
+    glm::vec3(1.0f, 1.0f, 1.0f),
+    glm::cos(glm::radians(12.5f)),
+    glm::cos(glm::radians(17.5f))};
+
+EmissiveLight emissiveLight = {
+    glm::vec3(1.0f, 1.0f, 1.0f) // White light
+};
 
 int main()
 {
@@ -98,7 +177,7 @@ int main()
 #endif
 
     // glfw window creation
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "CSE 4208: Computer Graphics Laboratory", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "CSE 4208: Computer Graphics Laboratory", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -133,8 +212,7 @@ int main()
         0.0f, 0.0f, 0.5f, 0.8f, 0.3f, 0.6f,
         0.5f, 0.0f, 0.5f, 0.4f, 0.4f, 0.8f,
         0.5f, 0.5f, 0.5f, 0.2f, 0.3f, 0.6f,
-        0.0f, 0.5f, 0.5f, 0.7f, 0.5f, 0.4f
-    };
+        0.0f, 0.5f, 0.5f, 0.7f, 0.5f, 0.4f};
     unsigned int cube_indices[] = {
         0, 3, 2,
         2, 1, 0,
@@ -152,8 +230,7 @@ int main()
         3, 7, 6,
 
         1, 5, 4,
-        4, 0, 1
-    };
+        4, 0, 1};
 
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
@@ -169,13 +246,12 @@ int main()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_indices), cube_indices, GL_STATIC_DRAW);
 
     // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
     // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-
 
     // render loop
     while (!glfwWindowShouldClose(window))
@@ -232,14 +308,12 @@ int main()
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, cylinderIndices.size() * sizeof(unsigned int), &cylinderIndices[0], GL_STATIC_DRAW);
 
         // position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
         glEnableVertexAttribArray(0);
 
         // color attribute
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
-
-
 
         glm::mat4 parentTrans = glm::mat4(1.0f);
 
@@ -255,66 +329,61 @@ int main()
         // Apply rotation around the Z-axis
         parentTrans = glm::rotate(parentTrans, glm::radians(rotateAngle_Z), glm::vec3(0.0f, 0.0f, 1.0f));
 
-
         // Drawing Table
-        //drawCube(ourShader, VAO, parentTrans, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 3.0f, 0.2f, 3.0f, glm::vec4(0.72f, 0.52f, 0.04f, 1.0f)); // wooden surface
+        // drawCube(ourShader, VAO, parentTrans, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 3.0f, 0.2f, 3.0f, glm::vec4(0.72f, 0.52f, 0.04f, 1.0f)); // wooden surface
         drawCylinder(ourShader, cylinderVAO, parentTrans,
-            0.5f, 0.5f, 0.5f, // position
-            0.0f, 0.0f, 0.0f, //rotation
-            1.9f, 0.04f, 1.9f, //scale
-            0.8f, 0.01f,
-            glm::vec4(0.72f, 0.52f, 0.04f, 1.0f));
-      
+                     0.5f, 0.5f, 0.5f,  // position
+                     0.0f, 0.0f, 0.0f,  // rotation
+                     1.9f, 0.04f, 1.9f, // scale
+                     0.8f, 0.01f,
+                     glm::vec4(0.72f, 0.52f, 0.04f, 1.0f));
 
-        //cylindrical leg
+        // cylindrical leg
         drawCylinder(ourShader, cylinderVAO, parentTrans,
-            0.0f, 0.36f, 0.0f, // position
-            0.0f, 0.0f, 0.0f, //rotation
-            0.3f, 0.56f, 0.3f, //scale
-            0.5f, 0.01f,
-            glm::vec4(0.6f, 0.6f, 0.6f, 1.0f));
-        
+                     0.0f, 0.36f, 0.0f, // position
+                     0.0f, 0.0f, 0.0f,  // rotation
+                     0.3f, 0.56f, 0.3f, // scale
+                     0.5f, 0.01f,
+                     glm::vec4(0.6f, 0.6f, 0.6f, 1.0f));
 
-
-        // Chair 1 (Front) 
+        // Chair 1 (Front)
         drawCube(ourShader, VAO, parentTrans, 0.0f, 0.25f, 0.9f, 0.0f, 0.0f, 0.0f, 1.0f, 0.2f, 1.0f, glm::vec4(0.54f, 0.27f, 0.07f, 1.0f)); // wooden seat
-        drawCube(ourShader, VAO, parentTrans, -0.2f, 0.1f, 0.7f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f)); // leg
-        drawCube(ourShader, VAO, parentTrans, 0.2f, 0.1f, 0.7f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));  // leg
-        drawCube(ourShader, VAO, parentTrans, -0.2f, 0.1f, 1.1f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f)); // leg
-        drawCube(ourShader, VAO, parentTrans, 0.2f, 0.1f, 1.1f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));  // leg
-        drawCube(ourShader, VAO, parentTrans, 0.0f, 0.4f, 1.13f, 0.0f, 90.0f, 0.0f, 0.1f, 0.8f, 1.0f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));  // backrest
+        drawCube(ourShader, VAO, parentTrans, -0.2f, 0.1f, 0.7f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));  // leg
+        drawCube(ourShader, VAO, parentTrans, 0.2f, 0.1f, 0.7f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));   // leg
+        drawCube(ourShader, VAO, parentTrans, -0.2f, 0.1f, 1.1f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));  // leg
+        drawCube(ourShader, VAO, parentTrans, 0.2f, 0.1f, 1.1f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));   // leg
+        drawCube(ourShader, VAO, parentTrans, 0.0f, 0.4f, 1.13f, 0.0f, 90.0f, 0.0f, 0.1f, 0.8f, 1.0f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f)); // backrest
 
         // Chair 2 (Back)
-        drawCube(ourShader, VAO, parentTrans, 0.0f, 0.25f, -0.9f, 0.0f, 0.0f, 0.0f, 1.0f, 0.2f, 1.0f, glm::vec4(0.54f, 0.27f, 0.07f, 1.0f)); // wooden seat
-        drawCube(ourShader, VAO, parentTrans, -0.2f, 0.1f, -0.7f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f)); // leg
-        drawCube(ourShader, VAO, parentTrans, 0.2f, 0.1f, -0.7f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));  // leg
-        drawCube(ourShader, VAO, parentTrans, 0.2f, 0.1f, -1.1f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));  // leg
-        drawCube(ourShader, VAO, parentTrans, -0.2f, 0.1f, -1.1f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f)); // leg
-        drawCube(ourShader, VAO, parentTrans, 0.0f, 0.4f, -1.13f, 0.0f, -90.0f, 0.0f, 0.1f, 0.8f, 1.0f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));  // backrest
+        drawCube(ourShader, VAO, parentTrans, 0.0f, 0.25f, -0.9f, 0.0f, 0.0f, 0.0f, 1.0f, 0.2f, 1.0f, glm::vec4(0.54f, 0.27f, 0.07f, 1.0f));  // wooden seat
+        drawCube(ourShader, VAO, parentTrans, -0.2f, 0.1f, -0.7f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));   // leg
+        drawCube(ourShader, VAO, parentTrans, 0.2f, 0.1f, -0.7f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));    // leg
+        drawCube(ourShader, VAO, parentTrans, 0.2f, 0.1f, -1.1f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));    // leg
+        drawCube(ourShader, VAO, parentTrans, -0.2f, 0.1f, -1.1f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));   // leg
+        drawCube(ourShader, VAO, parentTrans, 0.0f, 0.4f, -1.13f, 0.0f, -90.0f, 0.0f, 0.1f, 0.8f, 1.0f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f)); // backrest
 
         // Chair 3 (Right)
         drawCube(ourShader, VAO, parentTrans, 0.9f, 0.25f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.2f, 1.0f, glm::vec4(0.54f, 0.27f, 0.07f, 1.0f)); // wooden seat
-        drawCube(ourShader, VAO, parentTrans, 0.7f, 0.1f, -0.2f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f)); // leg
-        drawCube(ourShader, VAO, parentTrans, 0.7f, 0.1f, 0.2f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));  // leg
-        drawCube(ourShader, VAO, parentTrans, 1.1f, 0.1f, 0.2f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));  // leg
-        drawCube(ourShader, VAO, parentTrans, 1.1f, 0.1f, -0.2f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f)); // leg
+        drawCube(ourShader, VAO, parentTrans, 0.7f, 0.1f, -0.2f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));  // leg
+        drawCube(ourShader, VAO, parentTrans, 0.7f, 0.1f, 0.2f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));   // leg
+        drawCube(ourShader, VAO, parentTrans, 1.1f, 0.1f, 0.2f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));   // leg
+        drawCube(ourShader, VAO, parentTrans, 1.1f, 0.1f, -0.2f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));  // leg
         drawCube(ourShader, VAO, parentTrans, 1.13f, 0.4f, 0.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.8f, 1.0f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));  // backrest
 
         // Chair 4 (Left)
         drawCube(ourShader, VAO, parentTrans, -0.9f, 0.25f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.2f, 1.0f, glm::vec4(0.54f, 0.27f, 0.07f, 1.0f)); // wooden seat
-        drawCube(ourShader, VAO, parentTrans, -0.7f, 0.1f, -0.2f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f)); // leg
-        drawCube(ourShader, VAO, parentTrans, -0.7f, 0.1f, 0.2f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));  // leg
-        drawCube(ourShader, VAO, parentTrans, -1.1f, 0.1f, 0.2f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));  // leg
-        drawCube(ourShader, VAO, parentTrans, -1.1f, 0.1f, -0.2f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f)); // leg
+        drawCube(ourShader, VAO, parentTrans, -0.7f, 0.1f, -0.2f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));  // leg
+        drawCube(ourShader, VAO, parentTrans, -0.7f, 0.1f, 0.2f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));   // leg
+        drawCube(ourShader, VAO, parentTrans, -1.1f, 0.1f, 0.2f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));   // leg
+        drawCube(ourShader, VAO, parentTrans, -1.1f, 0.1f, -0.2f, 0.0f, 0.0f, 0.0f, 0.2f, 0.5f, 0.2f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));  // leg
         drawCube(ourShader, VAO, parentTrans, -1.13f, 0.4f, 0.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.8f, 1.0f, glm::vec4(0.4f, 0.26f, 0.13f, 1.0f));  // backrest
 
-        
         // Drawing floor
         drawCube(ourShader, VAO, parentTrans, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 12.0, 0.05, 12.0, glm::vec4(0.7f, 0.7f, 0.7f, 1.0f));
 
         // Drawing walls
         drawCube(ourShader, VAO, parentTrans, -3.0, 1.5, 0.0f, 0.0f, 0.0f, 0.0f, 0.05, 6.0, 12.0, glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)); // wall
-        drawCube(ourShader, VAO, parentTrans, 3.0, 1.5, 0.0f, 0.0f, 0.0f, 0.0f, 0.05, 6.0, 12.0, glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)); // wall
+        drawCube(ourShader, VAO, parentTrans, 3.0, 1.5, 0.0f, 0.0f, 0.0f, 0.0f, 0.05, 6.0, 12.0, glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));  // wall
         drawCube(ourShader, VAO, parentTrans, 0.0f, 1.5, -3.0, 0.0f, 0.0f, 0.0f, 12.0, 6.0, 0.05, glm::vec4(0.3f, 0.3f, 0.3f, 1.0f)); // wall
 
         // Drawing ceiling
@@ -324,12 +393,11 @@ int main()
                  12.0f, 0.05f, 12.0f,                // scale (covering the entire room)
                  glm::vec4(0.7f, 0.7f, 0.7f, 1.0f)); // color (light gray)
 
-        //Drawing fridge
-        drawCube(ourShader, VAO, parentTrans, -2.5, 0.5, -0.5f, 0.0f, 0.0f, 0.0f, 1.3f, 2.0f, 1.3f, glm::vec4(0.8f, 0.80f, 1.0f, 1.0f)); // lower body
+        // Drawing fridge
+        drawCube(ourShader, VAO, parentTrans, -2.5, 0.5, -0.5f, 0.0f, 0.0f, 0.0f, 1.3f, 2.0f, 1.3f, glm::vec4(0.8f, 0.80f, 1.0f, 1.0f));  // lower body
         drawCube(ourShader, VAO, parentTrans, -2.5, 1.25, -0.5f, 0.0f, 0.0f, 0.0f, 1.3f, 1.0f, 1.3f, glm::vec4(0.8f, 0.88f, 1.0f, 1.0f)); // upper body
-        drawCube(ourShader, VAO, parentTrans, -2.15, 0.5, -0.3f, 0.0f, 0.0f, 0.0f, 0.1f, 0.7f, 0.1f, glm::vec4(0.2f, 0.2f, 0.2f, 1.0f)); // lower handle
+        drawCube(ourShader, VAO, parentTrans, -2.15, 0.5, -0.3f, 0.0f, 0.0f, 0.0f, 0.1f, 0.7f, 0.1f, glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));  // lower handle
         drawCube(ourShader, VAO, parentTrans, -2.15, 1.25, -0.3f, 0.0f, 0.0f, 0.0f, 0.1f, 0.5f, 0.1f, glm::vec4(0.2f, 0.2f, 0.2f, 1.0f)); // lower handle
-
 
         // Draw the fan
         glm::mat4 fanTransform = glm::translate(parentTrans, glm::vec3(0.0f, 2.4f, 0.0f));                     // Move fan above the floor
@@ -339,13 +407,13 @@ int main()
         drawCylinder(ourShader, cylinderVAO, fanTransform,
                      0.0f, 0.4f, 0.0f,                   // position
                      0.0f, 0.0f, 0.0f,                   // rotation
-                     0.1f, 0.08f, 0.1f,                   // scale
+                     0.1f, 0.08f, 0.1f,                  // scale
                      0.2f, 0.35f,                        // height, radius
                      glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)); // red color
 
         // Fan stand
         drawCube(ourShader, VAO, fanTransform,
-                 -0.01f, 0.45f, 0.0f,                  // position
+                 -0.01f, 0.45f, 0.0f,                // position
                  0.0f, 0.0f, 0.0f,                   // rotation
                  0.05f, 0.5f, 0.05f,                 // scale
                  glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)); // color
@@ -357,7 +425,7 @@ int main()
             drawCube(ourShader, VAO, bladeTransform,
                      0.0f, 0.4f, 0.2f,                   // position
                      0.0f, 0.0f, 0.0f,                   // rotation
-                     0.3f, 0.08f, 0.9f,                 // scale
+                     0.3f, 0.08f, 0.9f,                  // scale
                      glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)); // color
         }
 
@@ -416,7 +484,7 @@ int main()
 
         // Draw a sphere
         drawSphere(ourShader, VAO, parentTrans,
-                   -2.0f, 0.5f, 1.0f,                   // position (adjusted y to 0.5)
+                   -2.0f, 0.5f, 1.0f,                  // position (adjusted y to 0.5)
                    0.0f, 0.0f, 0.0f,                   // rotation
                    1.0f, 1.0f, 1.0f,                   // scale
                    0.2f,                               // radius
@@ -424,12 +492,78 @@ int main()
 
         // Draw a cone
         drawCone(ourShader, VAO, parentTrans,
-                 -2.0f, 0.0f, 1.7f,                   // position
+                 -2.0f, 0.0f, 1.7f,                  // position
                  0.0f, 0.0f, 0.0f,                   // rotation
                  1.0f, 1.0f, 1.0f,                   // scale
                  0.8f,                               // height
                  0.3f,                               // radius
                  glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)); // color (green)
+
+        // Activate the shader program
+        ourShader.use();
+
+        // Set the light properties in the shader
+        ourShader.setVec3("viewPos", basic_camera.Position);         // Camera position
+        ourShader.setVec3("lightPos", glm::vec3(0.0f, 2.2f, -2.9f)); // Light position
+        ourShader.setVec3("viewPos", basic_camera.Position);
+        ourShader.setVec3("lightColor", glm::vec3(0.5f, 0.5f, 0.5f)); // Dimmed light
+        //white object color
+        glm::vec3 objectColor(1.0f, 1.0f, 1.0f);
+        //glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
+        ourShader.setVec3("objectColor", objectColor);
+        // Directional Light
+        ourShader.setBool("directionalLightOn", directionalLightOn);
+        ourShader.setVec3("directionalLight.direction", directionalLight.direction);
+        ourShader.setVec3("directionalLight.ambient", directionalLight.ambient);
+        ourShader.setVec3("directionalLight.diffuse", directionalLight.diffuse);
+        ourShader.setVec3("directionalLight.specular", directionalLight.specular);
+
+        // Point Light 1
+        ourShader.setBool("pointLight1On", pointLight1On);
+        ourShader.setVec3("pointLight1.position", pointLight1.position);
+        ourShader.setVec3("pointLight1.ambient", pointLight1.ambient);
+        ourShader.setVec3("pointLight1.diffuse", pointLight1.diffuse);
+        ourShader.setVec3("pointLight1.specular", pointLight1.specular);
+        ourShader.setFloat("pointLight1.constant", pointLight1.constant);
+        ourShader.setFloat("pointLight1.linear", pointLight1.linear);
+        ourShader.setFloat("pointLight1.quadratic", pointLight1.quadratic);
+
+        // Point Light 2
+        ourShader.setBool("pointLight2On", pointLight2On);
+        ourShader.setVec3("pointLight2.position", pointLight2.position);
+        ourShader.setVec3("pointLight2.ambient", pointLight2.ambient);
+        ourShader.setVec3("pointLight2.diffuse", pointLight2.diffuse);
+        ourShader.setVec3("pointLight2.specular", pointLight2.specular);
+        ourShader.setFloat("pointLight2.constant", pointLight2.constant);
+        ourShader.setFloat("pointLight2.linear", pointLight2.linear);
+        ourShader.setFloat("pointLight2.quadratic", pointLight2.quadratic);
+
+        // Spotlight
+        ourShader.setBool("spotLightOn", spotLightOn);
+        ourShader.setVec3("spotLight.position", spotLight.position);
+        ourShader.setVec3("spotLight.direction", spotLight.direction);
+        ourShader.setVec3("spotLight.ambient", spotLight.ambient);
+        ourShader.setVec3("spotLight.diffuse", spotLight.diffuse);
+        ourShader.setVec3("spotLight.specular", spotLight.specular);
+        ourShader.setFloat("spotLight.cutOff", spotLight.cutOff);
+        ourShader.setFloat("spotLight.outerCutOff", spotLight.outerCutOff);
+
+        // Emissive Light
+        ourShader.setBool("emissiveLightOn", emissiveLightOn);
+        ourShader.setVec3("emissiveLight.color", emissiveLight.color);
+
+        // Set the light and material uniforms
+        ourShader.setVec3("lightPos", glm::vec3(0.0f, 2.2f, -2.9f)); // Light position
+        ourShader.setVec3("viewPos", basic_camera.Position);
+        ourShader.setVec3("lightColor", glm::vec3(0.5f, 0.5f, 0.5f)); // Dimmed light
+
+        // Set the model matrix for the object
+        glm::mat4 model = glm::mat4(1.0f);
+        ourShader.setMat4("model", model);
+
+        // Set the other uniforms (e.g., view, projection)
+        ourShader.setMat4("view", view);
+        ourShader.setMat4("projection", projection);
 
         // Swap buffers and poll IO events
         glfwSwapBuffers(window);
@@ -447,80 +581,109 @@ int main()
 }
 
 // Process input
-void processInput(GLFWwindow* window)
+void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
         isFanRotating = !isFanRotating;
 
-    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) translate_Y += 0.01;
-    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) translate_Y -= 0.01;
-    if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) translate_X += 0.01;
-    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) translate_X -= 0.01;
-    if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) translate_Z += 0.01;
-    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) translate_Z -= 0.01;
+    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
+        translate_Y += 0.01;
+    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
+        translate_Y -= 0.01;
+    if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+        translate_X += 0.01;
+    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+        translate_X -= 0.01;
+    if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
+        translate_Z += 0.01;
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+        translate_Z -= 0.01;
 
-    if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) rotateAngle_X += .2;
-    if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) rotateAngle_Y += .2;
-    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) rotateAngle_Z += .2;
+    if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
+        rotateAngle_X += .2;
+    if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS)
+        rotateAngle_Y += .2;
+    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+        rotateAngle_Z += .2;
 
     // Camera movement
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        basic_camera.ProcessKeyboard('W', deltaTime);  // Forward
+        basic_camera.ProcessKeyboard('W', deltaTime); // Forward
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        basic_camera.ProcessKeyboard('S', deltaTime);  // Backward
+        basic_camera.ProcessKeyboard('S', deltaTime); // Backward
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        basic_camera.ProcessKeyboard('A', deltaTime);  // Left
+        basic_camera.ProcessKeyboard('A', deltaTime); // Left
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        basic_camera.ProcessKeyboard('D', deltaTime);  // Right
+        basic_camera.ProcessKeyboard('D', deltaTime); // Right
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-        basic_camera.ProcessKeyboard('E', deltaTime);  // Up
+        basic_camera.ProcessKeyboard('E', deltaTime); // Up
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
-        basic_camera.ProcessKeyboard('R', deltaTime);  // Down
+        basic_camera.ProcessKeyboard('R', deltaTime); // Down
 
     // Camera rotation
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        basic_camera.ProcessRotation('P', deltaTime);  // Pitch up
+        basic_camera.ProcessRotation('P', deltaTime); // Pitch up
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        basic_camera.ProcessRotation('N', deltaTime);  // Pitch down
+        basic_camera.ProcessRotation('N', deltaTime); // Pitch down
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-        basic_camera.ProcessRotation('Y', deltaTime);  // Yaw left
+        basic_camera.ProcessRotation('Y', deltaTime); // Yaw left
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-        basic_camera.ProcessRotation('H', deltaTime);  // Yaw right
+        basic_camera.ProcessRotation('H', deltaTime); // Yaw right
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
-        basic_camera.ProcessRotation('L', deltaTime);  // Roll counter-clockwise
+        basic_camera.ProcessRotation('L', deltaTime); // Roll counter-clockwise
     if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
-        basic_camera.ProcessRotation('R', deltaTime);  // Roll clockwise
+        basic_camera.ProcessRotation('R', deltaTime); // Roll clockwise
+
+    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+        directionalLightOn = !directionalLightOn;
+
+    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+        pointLight1On = !pointLight1On;
+
+    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+        pointLight2On = !pointLight2On;
+
+    if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
+        spotLightOn = !spotLightOn;
+
+    if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
+        ambientOn = !ambientOn;
+
+    if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS)
+        diffuseOn = !diffuseOn;
+
+    if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS)
+        specularOn = !specularOn;
 }
 
 // Framebuffer size callback
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
 
 // Scroll callback
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
     basic_camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
-//Draw Cylinder Function
+// Draw Cylinder Function
 void drawCylinder(Shader shaderProgram, unsigned int VAO, glm::mat4 parentTrans,
-    float posX, float posY,float posZ,
-    float rotX, float rotY,float rotZ,
-    float scX, float scY, float scZ,
-    float height, float radius, glm::vec4 color)
+                  float posX, float posY, float posZ,
+                  float rotX, float rotY, float rotZ,
+                  float scX, float scY, float scZ,
+                  float height, float radius, glm::vec4 color)
 {
     shaderProgram.use();
     std::vector<float> cylinderVertices;
     std::vector<unsigned int> cylinderIndices;
     int segments = 36;
     generateCylinderVertices(cylinderVertices, cylinderIndices, segments, height, radius);
-    
-    
-// Apply transformations: translation, rotation, scaling
+
+    // Apply transformations: translation, rotation, scaling
     glm::mat4 translateMatrix, rotateXMatrix, rotateYMatrix, rotateZMatrix, model, modelCentered;
     translateMatrix = glm::translate(parentTrans, glm::vec3(posX, posY, posZ));
     rotateXMatrix = glm::rotate(translateMatrix, glm::radians(rotX), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -541,13 +704,13 @@ void drawCylinder(Shader shaderProgram, unsigned int VAO, glm::mat4 parentTrans,
 
 // Draw Cube Function
 void drawCube(Shader shaderProgram, unsigned int VAO, glm::mat4 parentTrans,
-    float posX, float posY, float posZ,
-    float rotX, float rotY, float rotZ,
-    float scX, float scY, float scZ,
-    glm::vec4 color)
+              float posX, float posY, float posZ,
+              float rotX, float rotY, float rotZ,
+              float scX, float scY, float scZ,
+              glm::vec4 color)
 {
     shaderProgram.use();
-    
+
     // Apply transformations: translation, rotation, scaling
     glm::mat4 translateMatrix, rotateXMatrix, rotateYMatrix, rotateZMatrix, model, modelCentered;
     translateMatrix = glm::translate(parentTrans, glm::vec3(posX, posY, posZ));
@@ -568,25 +731,27 @@ void drawCube(Shader shaderProgram, unsigned int VAO, glm::mat4 parentTrans,
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 }
 
-void generateCylinderVertices(std::vector<float>& vertices, std::vector<unsigned int>& indices, int segments, float height, float radius) {
+void generateCylinderVertices(std::vector<float> &vertices, std::vector<unsigned int> &indices, int segments, float height, float radius)
+{
     // Top center vertex
     vertices.push_back(0.0f);
     vertices.push_back(height / 2.0f);
     vertices.push_back(0.0f);
     vertices.push_back(0.702f); // r
-    vertices.push_back(1.0f); // g
-    vertices.push_back(1.0f); // b
+    vertices.push_back(1.0f);   // g
+    vertices.push_back(1.0f);   // b
 
     // Bottom center vertex
     vertices.push_back(0.0f);
     vertices.push_back(-height / 2.0f);
     vertices.push_back(0.0f);
     vertices.push_back(0.702f); // r
-    vertices.push_back(1.0f); // g
-    vertices.push_back(1.0f); // b
+    vertices.push_back(1.0f);   // g
+    vertices.push_back(1.0f);   // b
 
     // Generate vertices around the top and bottom circles
-    for (int i = 0; i <= segments; i++) {
+    for (int i = 0; i <= segments; i++)
+    {
         float angle = 2.0f * 3.1416 * i / segments;
         float x = radius * cos(angle);
         float z = radius * sin(angle);
@@ -596,20 +761,21 @@ void generateCylinderVertices(std::vector<float>& vertices, std::vector<unsigned
         vertices.push_back(height / 2.0f);
         vertices.push_back(z);
         vertices.push_back(0.702f); // r
-        vertices.push_back(1.0f); // g
-        vertices.push_back(1.0f); // b
+        vertices.push_back(1.0f);   // g
+        vertices.push_back(1.0f);   // b
 
         // Bottom circle vertex
         vertices.push_back(x);
         vertices.push_back(-height / 2.0f);
         vertices.push_back(z);
         vertices.push_back(0.702f); // r
-        vertices.push_back(1.0f); // g
-        vertices.push_back(1.0f); // b
+        vertices.push_back(1.0f);   // g
+        vertices.push_back(1.0f);   // b
     }
 
     // Generate indices for the top and bottom circles
-    for (int i = 0; i < segments; i++) {
+    for (int i = 0; i < segments; i++)
+    {
         // Top circle
         indices.push_back(0);
         indices.push_back(2 + 2 * i);
